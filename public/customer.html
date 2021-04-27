@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sendbird Screen Share - Demo</title>
+    <!--
+        Bootstrap
+    -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+    <!--
+        Local styles
+    -->
+    <link href="/public/index.css" rel="stylesheet">    
+</head>
+<body onunload="unload()">
+    <!--
+        LOGIN
+    -->
+    <table align="center" height="100%" width="600" id="loginContainer"><tr>
+        <td valign="middle">
+            <div class="row d-flex justify-content-center">
+                <div class="col-auto">
+                    SB App ID
+                </div>
+                <div class="col-5">
+                    <input 
+                        id="appId"
+                        type="text" 
+                        placeholder="Sendbird application ID..." 
+                        class="form-control" 
+                        value=""
+                        />
+                </div>
+            </div>
+            <div class="row mt-2 d-flex justify-content-center">
+                <div class="col-auto">
+                    SB User ID
+                </div>
+                <div class="col-5 text-center">
+                    <input 
+                        id="userId"
+                        type="text" 
+                        placeholder="Sendbird user ID..." 
+                        class="form-control" 
+                        value="customer"
+                        />
+                    <div class="mt-3">
+                        <button class="btn btn-primary" 
+                            onclick="login()">
+                            Login
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr></table>
+    <!--
+        MAIN MENU
+    -->
+    <table align="center" width="100%" height="100%" id="mainMenuContainer" style="display:none">
+        <tr>
+            <td valign="middle">
+                <div class="container">
+                    <table width="100%" height="100%">
+                        <tr>
+                            <td align="center">
+                                <div class="videosHolders">
+                                    <!--
+                                        VIDEO BIG
+                                    -->
+                                    <div class="shadow videoBig">
+                                        <video
+                                            style="width:100%; height:100%" 
+                                            id="big_video_element_id" 
+                                            autoplay 
+                                            muted
+                                            />
+                                    </div>
+                                    <!--
+                                        VIDEO SMALL
+                                    -->
+                                    <div class="videoSmall">
+                                        <video 
+                                            style="width:100%; height:100%"
+                                            id="small_video_element_id" 
+                                            autoplay 
+                                            />
+                                    </div>
+                                    <button 
+                                        onclick="hideSmallWindow()"
+                                        id="butCloseSmallVideo"
+                                        class="btn btn-secondary btn-sm butCloseSmallVideo" 
+                                        >
+                                        Close
+                                    </button>
+                                    <!--
+                                        BOTTOM WITH CONTROLS
+                                    -->
+                                    <div class="footerContainer">
+                                        <div class="d-flex justify-content-center align-items-center h-100">
+                                            <div>
+                                                <button class="btn btn-light" id="butMakeCall" onclick="makeCall()">
+                                                    <img src="/public/img/video-outline.png" /> Video call Agent
+                                                </button>
+                                                <button class="btn btn-light ml-4" id="butMuteCall" onclick="mute()" style="display:none">
+                                                    <img src="/public/img/microphone.png" /> Mute
+                                                </button>    
+                                                <button class="btn btn-secondary ml-4" id="butUnmuteCall" onclick="unmute()" style="display:none">
+                                                    <img src="/public/img/microphone-off.png" /> Unmute
+                                                </button>    
+                                                <button class="btn btn-light ml-4" id="butShareScreen" style="display:none" onclick="shareScreen()">
+                                                    <img src="/public/img/projector-screen-outline.png" /> Share screen
+                                                </button>    
+                                                <button class="btn btn-light ml-4" id="butStopShareScreen" style="display:none" onclick="stopScreenShare()">
+                                                    <img src="/public/img/projector-screen-outline.png" /> Stop sharing
+                                                </button>    
+                                                <button class="btn btn-light ml-4" id="butEndCall" style="display:none" onclick="endCall()">
+                                                    <img src="/public/img/phone-off.png" /> End call
+                                                </button>    
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td width="30%">
+                                <div class="rightPanel">
+                                    <!--
+                                        CHAT MESSAGES
+                                    -->
+                                    <div class="shadow chatMessagesContainer text-left" id="messageList">
+                                    </div>
+                                    <!--
+                                        CHAT INPUT TEXT
+                                    -->
+                                    <div class="chatInputContainer">
+                                        <table width="100%"><tr>
+                                            <td>
+                                                <input 
+                                                    id="chatMessage"
+                                                    type="text" 
+                                                    class="form-control" 
+                                                    placeholder="Enter message..." 
+                                                    />
+                                            </td>
+                                            <td align="center">
+                                                <button class="btn btn-primary" onclick="sendMessage()">
+                                                    <img src="/public/img/send.png" />
+                                                </button>
+                                            </td>
+                                        </tr></table>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
+    </table>
+    <script>
+        var isCustomer = true;
+    </script>
+    <!-- AXIOS FOR SENDBIRD SDK -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!-- Include Senbird library -->
+    <script src="/public/node_modules/sendbird/SendBird.min.js"></script>
+    <!-- Include Senbird Calls library -->
+    <script src="/public/node_modules/sendbird-calls/SendBirdCall.min.js"></script>
+    <!-- Local script -->
+    <script src="/public/index.js"></script>
+</body>
+</html>
